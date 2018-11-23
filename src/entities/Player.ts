@@ -1,10 +1,8 @@
 import {m4,v3} from 'twgl.js';
 import {Keys, onMouseMove} from '../browser-utils/InputListeners';
+import {UP,RIGHT,FORWARD} from '../physics-utils/PhysicsConstants';
 
 // unit vectors
-const UP = [0, 1, 0];
-const RIGHT = [1, 0, 0];
-const FORWARD = [0, 0, -1];
 const PLAYER_COLLISION_RADIUS = 0.1;
 
 const YAW_SMALL_LIMIT = 0.0001;
@@ -21,6 +19,8 @@ export class Player {
   position: v3 = [0, 0, 0];
   velocity: v3 = [0, 0, 0];
   lookAt: v3 = [0, 0, 0];
+
+  debugger: any;
 
   constructor(private physics: any) {
     onMouseMove(this.handleMouseMove);
@@ -84,7 +84,7 @@ export class Player {
       }
 
       // set position from collision
-      this.position = v3.add(this.position, v3.mulScalar(rayVector, collision.t - 0.0001));
+      this.position = v3.add(this.position, v3.mulScalar(rayVector, collision.fraction - 0.0001));
 
       // check for second collision
       const dFallPosition2 = v3.mulScalar(this.velocity, dt);
@@ -92,7 +92,7 @@ export class Player {
       const collision2 = this.physics.checkRayCollisions(ray2);
       if (collision2) {
         // set position to second collision
-        this.position = v3.add(this.position, v3.mulScalar(ray2.vector, collision2.t - 0.0001));
+        this.position = v3.add(this.position, v3.mulScalar(ray2.vector, collision2.fraction - 0.0001));
       } else {
         // no second collision
         this.position = v3.add(this.position, v3.mulScalar(this.velocity, dt));

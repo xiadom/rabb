@@ -24,16 +24,20 @@ export function onMouseMove(l) {
 // handle keyboard events
 export const Keys = {} as any;
 export const KeyCodes = {
-  13: 'ENTER',
-  87: 'W',
-  65: 'A',
-  83: 'S',
-  68: 'D',
   38: 'UP',
   37: 'LEFT',
   40: 'DOWN',
   39: 'RIGHT',
+  13: 'ENTER',
   32: 'SPACE',
+  16: 'LEFT_SHIFT',
+  87: 'W',
+  65: 'A',
+  83: 'S',
+  68: 'D',
+  69: 'E',
+  78: 'N',
+  80: 'P',
 };
 window.addEventListener('keydown', (e) => { Keys[KeyCodes[e.keyCode]] = true; }, false);
 window.addEventListener('keyup', (e) => { Keys[KeyCodes[e.keyCode]] = false; }, false);

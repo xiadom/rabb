@@ -175,3 +175,83 @@ export class WorldCube implements GlEntity {
     this.bufferRange = {start, len};
   }
 }
+
+export class SurfPrism implements GlEntity {
+  texture: any;
+  bufferRange: any;
+
+  position: v3 = [0,0,0];
+  rotation: m4 = m4.identity();
+
+  constructor(private width: number, private height: number, private depth: number) {
+
+  }
+
+  update(time?) { }
+
+  getWorldMatrix() {
+    const {width, height, depth} = this;
+    var matrix = m4.translate(m4.identity(), this.position);
+    matrix = m4.multiply(matrix, this.rotation);
+    matrix = m4.scale(matrix, [width, height, depth]);
+    return matrix;
+  }
+
+  getVertexes() {
+    return new Float32Array([
+       0, 0.5, -0.5,
+       0, 0.5,  0.5,
+       0.5, -0.5, -0.5,
+       0.5, -0.5, -0.5,
+       0, 0.5,  0.5,
+       0.5, -0.5,  0.5,
+
+       0, 0.5,  0.5,
+       0, 0.5, -0.5,
+       -0.5, -0.5, -0.5,
+       -0.5, -0.5,  0.5,
+        0, 0.5,  0.5,
+       -0.5, -0.5, -0.5,
+
+       -0.5, -0.5,  0.5,
+       0.5, -0.5,  0.5,
+       0, 0.5,  0.5,
+       -0.5, -0.5,  -0.5,
+       0, 0.5,  -0.5,
+       0.5, -0.5,  -0.5,
+    ]);
+  }
+
+  getTexcoords() {
+    const {width, height, depth} = this;
+    return new Float32Array([
+      depth, 0,
+      0, 0,
+      depth, height,
+      depth, height,
+      0, 0,
+      0, height,
+
+      depth, 0,
+      0, 0,
+      0, height,
+      depth, height,
+      depth, 0,
+      0, height,
+
+      0, height,
+      width, height,
+      0.5 * width, 0,
+      width, height,
+      0.5 * width, 0,
+      0, height,
+    ]);
+  }
+
+  getBufferRange() {
+    return this.bufferRange;
+  }
+  setBufferRange(start, len) {
+    this.bufferRange = {start, len};
+  }
+}

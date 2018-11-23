@@ -1,6 +1,6 @@
 import {m4,v3} from 'twgl.js';
 
-const EPSILON = 0.000001;
+const EPSILON = 1e-323;
 const CULLING = false;
 
 export interface Ray {
@@ -14,7 +14,13 @@ export interface Triangle {
   v2: v3;
 }
 
-export function rayTriangleIntersection(ray: Ray, triangle: Triangle) {
+export interface Intersection {
+  fraction: number;
+  triangle: Triangle;
+  triangleNormal: v3;
+}
+
+export function rayTriangleIntersection(ray: Ray, triangle: Triangle): Intersection | false {
   // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 
   const edge1: v3 = v3.subtract(triangle.v1, triangle.v0);
@@ -61,7 +67,7 @@ export function rayTriangleIntersection(ray: Ray, triangle: Triangle) {
     if (t <= 1.0) {
       // intersects in segment
       const triangleNormal = v3.normalize(v3.cross(edge1, edge2));
-      return {t, triangle, triangleNormal};
+      return {fraction: t, triangle, triangleNormal};
     }
   }
 

@@ -1,5 +1,6 @@
 import * as twgl from 'twgl.js';
 import {GlRenderer} from './gl-utils/GlRenderer';
+import {PhysicsDebugger} from './physics-utils/PhysicsDebugger';
 import {PhysicsProgram} from './physics-utils/PhysicsProgram';
 import {requestPointerLock} from './browser-utils/InputListeners';
 import {createScene} from './resources/DemoScene';
@@ -22,6 +23,7 @@ function init() {
 
   // programs
   const physics = new PhysicsProgram();
+  // physics.debugger = new PhysicsDebugger(gl, physics);
   const renderer = new GlRenderer(gl, physics);
 
   // scene
@@ -31,7 +33,6 @@ function init() {
   // render loop
   const drawFrame = (time) => {
     renderer.drawScene(time, scene);
-    // if (time > 4000) return;
     requestAnimationFrame(drawFrame);
   };
   requestAnimationFrame(drawFrame);

@@ -1,4 +1,5 @@
 import {primitives,v3,m4} from 'twgl.js';
+import {mapIndices2d,mapIndices3d} from '../gl-utils/MiscUtils';
 import {GlEntity} from '../gl-utils/GlEntity';
 import {PhysicsProgram} from '../physics-utils/PhysicsProgram';
 
@@ -20,23 +21,8 @@ export class BouncingBall implements GlEntity {
     this.sphere = primitives.createSphereVertices(RADIUS, subdivisionsAxis, subdivisionsHeight);
 
     // translate index list to vertex array
-    this.vertexes = (() =>
-      new Float32Array(Array.prototype.reduce.call(this.sphere.indices, (acc, id) =>
-        acc.concat([
-          this.sphere.position[3 * id],
-          this.sphere.position[3 * id + 1],
-          this.sphere.position[3 * id + 2],
-        ])
-      , []))
-    )();
-    this.texcoords = (() =>
-      new Float32Array(Array.prototype.reduce.call(this.sphere.indices, (acc, id) =>
-        acc.concat([
-          this.sphere.texcoord[3 * id],
-          this.sphere.texcoord[3 * id + 1],
-        ])
-      , []))
-    )();
+    this.vertexes = new Float32Array(mapIndices3d(this.sphere, 'position'));
+    this.texcoords = new Float32Array(mapIndices2d(this.sphere, 'texcoord'));
   }
 
   update = (dt) => {

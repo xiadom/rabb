@@ -1,9 +1,10 @@
 import * as twgl from 'twgl.js';
 import {GlTexture} from '../gl-utils/GlTexture';
 import {createGridTexture} from '../resources/SimpleTextures';
-import {WorldPlane,WorldCube} from '../entities/WorldPrimitives';
+import {WorldPlane,WorldCube,SurfPrism} from '../entities/WorldPrimitives';
 import {BouncingBall} from '../entities/PhysicsPrimitives';
 import {Player} from '../entities/Player';
+import {Player16} from '../entities/Player16';
 
 const floorWidth = 50;
 const floorDepth = 500;
@@ -25,14 +26,12 @@ export function createScene(gl, physics) {
   const floor = new WorldPlane(floorWidth, floorDepth);
   floor.texture = texture2;
   floor.position = [0,-1,0];
-  const ramp1 = new WorldPlane(3, 10);
+  const ramp1 = new SurfPrism(2, 2, 10);
   ramp1.texture = texture;
   ramp1.position = [-2,0,-4];
-  ramp1.rotation = twgl.m4.rotationZ(-Math.PI * (4 / 15));
-  const ramp2 = new WorldPlane(3, 10);
+  const ramp2 = new SurfPrism(2, 2, 10);
   ramp2.texture = texture;
   ramp2.position = [2,0,-4];
-  ramp2.rotation = twgl.m4.rotationZ(Math.PI * (4 / 15));
   const box = new WorldCube(1, 1, 1);
   box.texture = texture3;
   box.position = [2,-0.5,2.5];
@@ -55,12 +54,18 @@ export function createScene(gl, physics) {
 
   const objects = world.concat([
     ball
-  ] as any);
+  ] as any)
+
+  if (physics.debugger) {
+    physics.debugger.objects.forEach((o) => objects.push(o));
+  }
+
 
   // create player entity
-  const player = new Player(physics);
-  player.position = [0, 2, 3];
+  const player = new Player16(physics);
+  player.position = [0, 2, -3];
   player.rotateX = -Math.PI / 12;
+  player.debugger = physics.debugger;
 
   return {
     objects,

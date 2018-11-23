@@ -1,4 +1,5 @@
 import {v3,m4} from 'twgl.js';
+import {EPSILON} from './PhysicsConstants';
 import {rayTriangleIntersection, Triangle} from './CollisionDetection';
 
 const GRAVITY = [0, -9.8, 0];
@@ -10,6 +11,7 @@ const FRICTION = 4;
 
 export class PhysicsProgram {
   triangles: Triangle[];
+  debugger: any;
 
   constructor() {
   }
@@ -29,19 +31,47 @@ export class PhysicsProgram {
     });
   }
 
-  checkRayCollisions(ray) {
+  checkRayCollisions(ray, debugTag?) {
     let nearestCollision = null;
-    let nearestT = 1.00001;
+    let closestFraction = 1 + EPSILON;
+    let falseCollision;
     for (let i = 0; i < this.triangles.length; i += 1) {
       const triangle = this.triangles[i];
-      const collision = rayTriangleIntersection(ray, triangle);
-      if (collision) {
-        if (collision.t < nearestT) {
+
+      // move startpoint slightly backward to catch entry into solids
+      const rayL = {...ray, origin: v3.subtract(ray.origin, v3.mulScalar(ray.vector, EPSILON))}
+      const collision2 = rayTriangleIntersection(rayL, triangle);
+      if (collision2) {
+        // calculate true fraction
+        const collision = rayTriangleIntersection(ray, triangle);
+        if (!collision) {
+          falseCollision = collision2;
+        }
+        const collisionDepth = (collision ? collision.fraction : 0.0001);
+        if (collisionDepth < closestFraction) {
           nearestCollision = collision;
-          nearestT = collision.t;
+          closestFraction = collisionDepth;
         }
       }
     }
+
+    if (!nearestCollision && falseCollision) {
+      // console.log('false collision', v3.dot(ray.vector, falseCollision.triangleNormal), falseCollision.fraction)
+      if (falseCollision.fraction > EPSILON) {
+        nearestCollision = falseCollision;
+      }
+    }
+
+    if (debugTag && this.debugger) {
+      const debugInfo = {
+        ray, debugTag, nearestCollision, closestFraction, falseCollision
+      } as any;
+
+      if (this.debugger) {
+        this.debugger.logTrace(debugInfo);
+      }
+    }
+
     return nearestCollision;
   }
 
@@ -52,8 +82,8 @@ export class PhysicsProgram {
   getCollisionReflection(ray, velocity, gravityDv, collision, dt) {
 
     // estimate collision velocity
-    const velocityAtCollision = v3.add(velocity, v3.mulScalar(gravityDv, collision.t));
-    const dPositionT = v3.mulScalar(ray.vector, collision.t);
+    const velocityAtCollision = v3.add(velocity, v3.mulScalar(gravityDv, collision.fraction));
+    const dPositionT = v3.mulScalar(ray.vector, collision.fraction);
     const collisionPoint = v3.add(ray.origin, dPositionT);
 
     // reflect velocity relative to collision triangle normal
@@ -64,10 +94,10 @@ export class PhysicsProgram {
         2.0 * v3.dot(velocityAtCollision, collision.triangleNormal)));
 
     // subtract remaining gravity
-    const finalVelocity = v3.add(reflectedVelocity, v3.mulScalar(gravityDv, (1.0 - collision.t)));
+    const finalVelocity = v3.add(reflectedVelocity, v3.mulScalar(gravityDv, (1.0 - collision.fraction)));
 
     // estimate after-bounce position
-    const dPosition2 = v3.mulScalar(reflectedVelocity, dt * (1.0 - collision.t));
+    const dPosition2 = v3.mulScalar(reflectedVelocity, dt * (1.0 - collision.fraction));
 
 
     return {
